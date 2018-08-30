@@ -42,14 +42,17 @@ const abortIndex int8 = math.MaxInt8 / 2
 // manage the flow, validate the JSON of a request and render a JSON response for example.
 //context 最重要类型.
 type Context struct {
+	//响应数据
 	writermem responseWriter
+	//请求数据
 	Request   *http.Request
 	Writer    ResponseWriter
-
+	//请求类型
 	Params   Params
+	//函数handle处理链
 	handlers HandlersChain
 	index    int8
-
+	
 	engine *Engine
 
 	// Keys is a key/value pair exclusively for the context of each request.
@@ -64,10 +67,12 @@ type Context struct {
 
 /************************************/
 /********** CONTEXT CREATION ********/
+/********** context 类型创建 ********/
 /************************************/
 
 func (c *Context) reset() {
 	c.Writer = &c.writermem
+	//[0:0]空切片
 	c.Params = c.Params[0:0]
 	c.handlers = nil
 	c.index = -1
@@ -78,6 +83,7 @@ func (c *Context) reset() {
 
 // Copy returns a copy of the current context that can be safely used outside the request's scope.
 // This has to be used when the context has to be passed to a goroutine.
+// 复制一份,指针复制
 func (c *Context) Copy() *Context {
 	var cp = *c
 	cp.writermem.ResponseWriter = nil
@@ -104,7 +110,8 @@ func (c *Context) Handler() HandlerFunc {
 
 // Next should be used only inside middleware.
 // It executes the pending handlers in the chain inside the calling handler.
-// See example in GitHub.
+// See example in GitHubi.
+// 取handle函数,
 func (c *Context) Next() {
 	c.index++
 	for s := int8(len(c.handlers)); c.index < s; c.index++ {
@@ -151,6 +158,7 @@ func (c *Context) AbortWithError(code int, err error) *Error {
 
 /************************************/
 /********* ERROR MANAGEMENT *********/
+/********* 错误	管理	    *********/
 /************************************/
 
 // Error attaches an error to the current context. The error is pushed to a list of errors.
